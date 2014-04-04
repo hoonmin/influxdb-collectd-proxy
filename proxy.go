@@ -1,4 +1,4 @@
-ackage main
+package main
 
 import (
 	"flag"
@@ -91,21 +91,24 @@ func main() {
 				continue
 			}
 
-			// if there's no PluginInstance, use Plugin value
-			if packet.PluginInstance == "" {
-				packet.PluginInstance = packet.Plugin
-			}
+                        // as hostname contains commas, let's replace them
+                        hostName := strings.Replace(packet.Hostname, ".", "_", -1)
 
-			// hostname contains commas, so let's replace them
-			name := strings.Replace(packet.Hostname, ".", "_", -1) + "."
+                        // if there's a PluginInstance, use it
+                        pluginName := packet.Plugin
+                        if packet.PluginInstance != "" {
+                                pluginName += "-" + packet.PluginInstance
+                        }
 
-			if t == nil {
-				// incoming type instance
-				name += packet.Plugin + "." + packet.PluginInstance + "." + packet.Type + "." + packet.TypeInstance
-			} else {
-				// type instance in types.db
-				name += packet.Plugin + "." + packet.PluginInstance + "." + packet.Type + "." + t[i][0]
-			}
+                        // if there's a TypeInstance, use it
+                        typeName := packet.Type
+                        if packet.TypeInstance != "" {
+                                typeName += "-" + packet.TypeInstance
+                        } else if t != nil {
+                                typeName += "-" + t[i][0]
+                        }
+
+                        name := hostName + "." + pluginName + "." + typeName
 
 			// influxdb stuffs
 			timestamp := packet.Time().UnixNano() / 1000000
