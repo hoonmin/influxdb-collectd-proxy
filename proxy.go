@@ -2,12 +2,13 @@ package main
 
 import (
 	"flag"
+	influxdb "github.com/influxdb/influxdb-go"
+	collectd "github.com/paulhammond/gocollectd"
 	"log"
+	"math"
 	"os"
 	"os/signal"
 	"strings"
-	influxdb "github.com/influxdb/influxdb-go"
-	collectd "github.com/paulhammond/gocollectd"
 )
 
 // proxy options
@@ -21,7 +22,17 @@ var host = flag.String("influxdb", "localhost:8086", "host:port for influxdb")
 var username = flag.String("username", "root", "username for influxdb")
 var password = flag.String("password", "root", "password for influxdb")
 var database = flag.String("database", "", "database for influxdb")
+var normalize = flag.Bool("normalize", true, "true if you need to normalize data for COUNTER and DERIVE types (over time)")
 
+// point cache to perform data normalization for COUNTER and DERIVE types
+type CacheEntry struct {
+	Timestamp int64
+	Value     float64
+}
+
+var beforeCache = make(map[string]CacheEntry)
+
+// signal handler
 func handleSignals(c chan os.Signal) {
 	// block until a signal is received
 	sig := <-c
@@ -91,46 +102,65 @@ func main() {
 				continue
 			}
 
-                        // as hostname contains commas, let's replace them
-                        hostName := strings.Replace(packet.Hostname, ".", "_", -1)
+			// as hostname contains commas, let's replace them
+			hostName := strings.Replace(packet.Hostname, ".", "_", -1)
 
-                        // if there's a PluginInstance, use it
-                        pluginName := packet.Plugin
-                        if packet.PluginInstance != "" {
-                                pluginName += "-" + packet.PluginInstance
-                        }
+			// if there's a PluginInstance, use it
+			pluginName := packet.Plugin
+			if packet.PluginInstance != "" {
+				pluginName += "-" + packet.PluginInstance
+			}
 
-                        // if there's a TypeInstance, use it
-                        typeName := packet.Type
-                        if packet.TypeInstance != "" {
-                                typeName += "-" + packet.TypeInstance
-                        } else if t != nil {
-                                typeName += "-" + t[i][0]
-                        }
+			// if there's a TypeInstance, use it
+			typeName := packet.Type
+			if packet.TypeInstance != "" {
+				typeName += "-" + packet.TypeInstance
+			} else if t != nil {
+				typeName += "-" + t[i][0]
+			}
 
-                        name := hostName + "." + pluginName + "." + typeName
+			name := hostName + "." + pluginName + "." + typeName
 
 			// influxdb stuffs
 			timestamp := packet.Time().UnixNano() / 1000000
 			value := values[i].Float64()
+			dataType := packet.DataTypes[i]
+			readyToSend := true
+			normalizedValue := value
 
-			series := &influxdb.Series{
-				Name:    name,
-				Columns: []string{"time", "value"},
-				Points: [][]interface{}{
-					[]interface{}{timestamp, value},
-				},
+			if *normalize && dataType == collectd.TypeCounter || dataType == collectd.TypeDerive {
+				if before, ok := beforeCache[name]; ok && before.Value != math.NaN() {
+					// normalize over time
+					normalizedValue = (value - before.Value) / float64((timestamp-before.Timestamp)/1000)
+				} else {
+					// skip current data if there's no initial entry
+					readyToSend = false
+				}
+				entry := CacheEntry{
+					Timestamp: timestamp,
+					Value:     value,
+				}
+				beforeCache[name] = entry
 			}
 
-			if *verbose {
-				log.Printf("[TRACE] ready to send series: %v\n", series)
-			}
+			if readyToSend {
+				series := &influxdb.Series{
+					Name:    name,
+					Columns: []string{"time", "value"},
+					Points: [][]interface{}{
+						[]interface{}{timestamp, normalizedValue},
+					},
+				}
 
-			if err := client.WriteSeries([]*influxdb.Series{series}); err != nil {
-				log.Printf("failed to write in influxdb: %s -> %f, reason=%v\n", name, values[i], err)
-				continue
+				if *verbose {
+					log.Printf("[TRACE] ready to send series: %v\n", series)
+				}
+
+				if err := client.WriteSeries([]*influxdb.Series{series}); err != nil {
+					log.Printf("failed to write in influxdb: %s -> %f, reason=%v\n", name, values[i], err)
+					continue
+				}
 			}
 		}
 	}
 }
-

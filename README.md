@@ -34,10 +34,11 @@ $ bin/proxy --typesdb="types.db" --database="collectd" --username="collectd" --p
 
 ```
 $ bin/proxy --help
-Usage of ./proxy:
+Usage of bin/proxy:
   -database="": database for influxdb
   -influxdb="localhost:8086": host:port for influxdb
   -logfile="proxy.log": path to log file
+  -normalize=true: true if you need to normalize data for COUNTER and DERIVE types (over time)
   -password="root": password for influxdb
   -proxyport="8096": port for proxy
   -typesdb="types.db": path to types.db
