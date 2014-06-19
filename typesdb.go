@@ -21,7 +21,7 @@ func ParseTypesDB(path string) (map[string][][]string, error) {
 
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
-		fields := strings.Split(scanner.Text(), " ")
+		fields := strings.Split(strings.Replace(scanner.Text(), "\t", " ", -1), " ")
 		if len(fields) < 2 {
 			continue
 		}
