@@ -131,7 +131,11 @@ func main() {
 			if *normalize && dataType == collectd.TypeCounter || dataType == collectd.TypeDerive {
 				if before, ok := beforeCache[name]; ok && before.Value != math.NaN() {
 					// normalize over time
-					normalizedValue = (value - before.Value) / float64((timestamp-before.Timestamp)/1000)
+					if timestamp-before.Timestamp > 0 {
+						normalizedValue = (value - before.Value) / float64((timestamp-before.Timestamp)/1000)
+					} else {
+						normalizedValue = value - before.Value
+					}
 				} else {
 					// skip current data if there's no initial entry
 					readyToSend = false
@@ -157,7 +161,7 @@ func main() {
 				}
 
 				if err := client.WriteSeries([]*influxdb.Series{series}); err != nil {
-					log.Printf("failed to write in influxdb: %s -> %f, reason=%v\n", name, values[i], err)
+					log.Printf("failed to write in influxdb: %s -> %v, reason=%s\n", name, values[i], err)
 					continue
 				}
 			}
