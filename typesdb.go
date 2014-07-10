@@ -7,10 +7,12 @@ import (
 	"strings"
 )
 
+type Types map[string][][]string
+
 // Parses types.db file.
 // The result map looks like this:
 // 	"ps_count" -> [["processes" "GAUGE" "0" "1000000"] ["threads" "GAUGE" "0" "1000000"]]
-func ParseTypesDB(path string) (map[string][][]string, error) {
+func ParseTypesDB(path string) (Types, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err

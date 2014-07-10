@@ -41,7 +41,7 @@ Usage of bin/proxy:
   -normalize=true: true if you need to normalize data for COUNTER and DERIVE types (over time)
   -password="root": password for influxdb
   -proxyport="8096": port for proxy
-  -typesdb="types.db": path to types.db
+  -typesdb="types.db": path to Collectd's types.db
   -username="root": username for influxdb
   -verbose=false: true if you need to trace the requests
 ```
