@@ -113,14 +113,16 @@ func main() {
 		if time.Since(timer) < influxWriteInterval {
 			continue
 		} else {
-			if err := client.WriteSeries(seriesGroup); err != nil {
-				log.Printf("failed to write series group to influxdb: %s\n", err)
-			}
-			if *verbose {
-				log.Printf("[TRACE] wrote %d series\n", len(seriesGroup))
+			if len(seriesGroup) > 0 {
+				if err := client.WriteSeries(seriesGroup); err != nil {
+					log.Printf("failed to write series group to influxdb: %s\n", err)
+				}
+				if *verbose {
+					log.Printf("[TRACE] wrote %d series\n", len(seriesGroup))
+				}
+				seriesGroup = make([]*influxdb.Series, 0)
 			}
 			timer = time.Now()
-			seriesGroup = make([]*influxdb.Series, 0)
 		}
 	}
 }
@@ -158,7 +160,7 @@ func processPacket(packet collectd.Packet) []*influxdb.Series {
 		if packet.TypeInstance != "" {
 			typeName += "-" + packet.TypeInstance
 		} else if t != nil {
-			typeName += "-" + t[i][0]
+			typeName += "-" + t[i]
 		}
 
 		name := hostName + "." + pluginName + "." + typeName
