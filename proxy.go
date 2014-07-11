@@ -14,6 +14,7 @@ import (
 )
 
 const influxWriteInterval = time.Second
+const influxWriteLimit = 50
 
 var (
 	proxyPort   *string
@@ -110,7 +111,7 @@ func main() {
 		packet := <-c
 		seriesGroup = append(seriesGroup, processPacket(packet)...)
 
-		if time.Since(timer) < influxWriteInterval {
+		if time.Since(timer) < influxWriteInterval && len(seriesGroup) < influxWriteLimit {
 			continue
 		} else {
 			if len(seriesGroup) > 0 {
@@ -129,7 +130,7 @@ func main() {
 
 func processPacket(packet collectd.Packet) []*influxdb.Series {
 	if *verbose {
-		log.Printf("[TRACE] got a packet: %v\n", packet.Hostname, packet)
+		log.Printf("[TRACE] got a packet: %v\n", packet)
 	}
 
 	var seriesGroup []*influxdb.Series
