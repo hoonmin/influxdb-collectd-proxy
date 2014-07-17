@@ -3,7 +3,7 @@ BIN=bin
 EXE=proxy
 
 GOCOLLECTD=github.com/paulhammond/gocollectd
-INFLUXDBGO=github.com/influxdb/influxdb-go
+INFLUXDBGO=github.com/influxdb/influxdb/client
 
 all: get build
 
