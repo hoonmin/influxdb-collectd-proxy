@@ -7,17 +7,19 @@ import (
 	"strings"
 )
 
+type Types map[string][]string
+
 // Parses types.db file.
 // The result map looks like this:
 // 	"ps_count" -> [["processes" "GAUGE" "0" "1000000"] ["threads" "GAUGE" "0" "1000000"]]
-func ParseTypesDB(path string) (map[string][][]string, error) {
+func ParseTypesDB(path string) (Types, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
 	defer f.Close()
 
-	result := make(map[string][][]string)
+	result := make(Types)
 
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
@@ -31,7 +33,7 @@ func ParseTypesDB(path string) (map[string][][]string, error) {
 			continue
 		}
 
-		types := [][]string{}
+		types := []string{}
 		for _, v := range fields[1:] {
 			if len(v) == 0 {
 				continue
@@ -45,7 +47,7 @@ func ParseTypesDB(path string) (map[string][][]string, error) {
 				continue
 			}
 
-			types = append(types, vFields)
+			types = append(types, vFields...)
 		}
 		result[typeName] = types
 	}
