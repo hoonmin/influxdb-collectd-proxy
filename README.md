@@ -48,9 +48,18 @@ Usage of bin/proxy:
 
 ## Dependencies
 
-- http://github.com/paulhammond/gocollectd/
-- http://github.com/influxdb/influxdb-go/
+- http://github.com/paulhammond/gocollectd
+- http://github.com/influxdb/influxdb/client
+  - https://github.com/influxdb/influxdb/tree/master/client
 
 ## References
 
 - http://github.com/bpaquet/collectd-influxdb-proxy
+
+## Contributors
+
+This project is maintained with following contributors' supports.
+
+- porjo (http://github.com/porjo)
+- feraudet (http://github.com/feraudet)
+- falzm (http://github.com/falzm)
