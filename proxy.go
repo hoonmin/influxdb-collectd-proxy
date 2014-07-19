@@ -161,7 +161,7 @@ func processPacket(packet collectd.Packet) []*influxdb.Series {
 		if packet.TypeInstance != "" {
 			typeName += "-" + packet.TypeInstance
 		} else if t != nil {
-			typeName += "-" + t[i]
+			typeName += "-" + t[i][0]
 		}
 
 		name := hostName + "." + pluginName + "." + typeName
