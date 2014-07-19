@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-type Types map[string][]string
+type Types map[string][][]string
 
 // Parses types.db file.
 // The result map looks like this:
@@ -33,7 +33,7 @@ func ParseTypesDB(path string) (Types, error) {
 			continue
 		}
 
-		types := []string{}
+		types := [][]string{}
 		for _, v := range fields[1:] {
 			if len(v) == 0 {
 				continue
@@ -47,7 +47,7 @@ func ParseTypesDB(path string) (Types, error) {
 				continue
 			}
 
-			types = append(types, vFields...)
+			types = append(types, vFields)
 		}
 		result[typeName] = types
 	}
