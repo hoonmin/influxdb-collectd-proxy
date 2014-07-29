@@ -40,6 +40,7 @@ Usage of bin/proxy:
   -logfile="proxy.log": path to log file
   -normalize=true: true if you need to normalize data for COUNTER and DERIVE types (over time)
   -password="root": password for influxdb
+  -proxyhost="0.0.0.0": host for proxy
   -proxyport="8096": port for proxy
   -typesdb="types.db": path to Collectd's types.db
   -username="root": username for influxdb

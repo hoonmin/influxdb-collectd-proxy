@@ -17,6 +17,7 @@ const influxWriteInterval = time.Second
 const influxWriteLimit = 50
 
 var (
+	proxyHost   *string
 	proxyPort   *string
 	typesdbPath *string
 	logPath     *string
@@ -51,6 +52,7 @@ func handleSignals(c chan os.Signal) {
 
 func init() {
 	// proxy options
+	proxyHost = flag.String("proxyhost", "0.0.0.0", "host for proxy")
 	proxyPort = flag.String("proxyport", "8096", "port for proxy")
 	typesdbPath = flag.String("typesdb", "types.db", "path to Collectd's types.db")
 	logPath = flag.String("logfile", "", "path to log file (log to stderr if empty)")
@@ -107,8 +109,8 @@ func main() {
 	c := make(chan collectd.Packet)
 
 	// then start to listen
-	go collectd.Listen("0.0.0.0:"+*proxyPort, c)
-	log.Printf("proxy started on %s\n", *proxyPort)
+	go collectd.Listen(*proxyHost+":"+*proxyPort, c)
+	log.Printf("proxy started on %s:%s\n", *proxyHost, *proxyPort)
 	timer := time.Now()
 	var seriesGroup []*influxdb.Series
 	for {
