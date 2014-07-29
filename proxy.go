@@ -53,7 +53,7 @@ func init() {
 	// proxy options
 	proxyPort = flag.String("proxyport", "8096", "port for proxy")
 	typesdbPath = flag.String("typesdb", "types.db", "path to Collectd's types.db")
-	logPath = flag.String("logfile", "proxy.log", "path to log file")
+	logPath = flag.String("logfile", "", "path to log file (log to stderr if empty)")
 	verbose = flag.Bool("verbose", false, "true if you need to trace the requests")
 
 	// influxdb options
@@ -76,12 +76,16 @@ func init() {
 }
 
 func main() {
-	logFile, err := os.OpenFile(*logPath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-	if err != nil {
-		log.Fatalf("failed to open file: %v\n", err)
+	var err error
+
+	if *logPath != "" {
+		logFile, err := os.OpenFile(*logPath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+		if err != nil {
+			log.Fatalf("failed to open file: %v\n", err)
+		}
+		log.SetOutput(logFile)
+		defer logFile.Close()
 	}
-	log.SetOutput(logFile)
-	defer logFile.Close()
 
 	// make influxdb client
 	client, err = influxdb.NewClient(&influxdb.ClientConfig{
