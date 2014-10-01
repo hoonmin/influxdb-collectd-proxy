@@ -38,7 +38,8 @@ Usage of bin/proxy:
   -database="": database for influxdb
   -influxdb="localhost:8086": host:port for influxdb
   -logfile="proxy.log": path to log file
-  -normalize=true: true if you need to normalize data for COUNTER and DERIVE types (over time)
+  -normalize=true: true if you need to normalize data for COUNTER types (over time)
+  -storerates=true: true if you need to derive rates from DERIVE types
   -password="root": password for influxdb
   -proxyhost="0.0.0.0": host for proxy
   -proxyport="8096": port for proxy
@@ -64,3 +65,5 @@ This project is maintained with following contributors' supports.
 - porjo (http://github.com/porjo)
 - feraudet (http://github.com/feraudet)
 - falzm (http://github.com/falzm)
+- vbatoufflet (http://github.com/vbatoufflet)
+- cstorey (http://github.com/cstorey)
