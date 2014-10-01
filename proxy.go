@@ -29,6 +29,7 @@ var (
 	password  *string
 	database  *string
 	normalize *bool
+	storeRates *bool
 
 	types       Types
 	client      *influxdb.Client
@@ -63,7 +64,8 @@ func init() {
 	username = flag.String("username", "root", "username for influxdb")
 	password = flag.String("password", "root", "password for influxdb")
 	database = flag.String("database", "", "database for influxdb")
-	normalize = flag.Bool("normalize", true, "true if you need to normalize data for COUNTER and DERIVE types (over time)")
+	normalize = flag.Bool("normalize", true, "true if you need to normalize data for COUNTER types (over time)")
+	storeRates = flag.Bool("storerates", true, "true if you need to derive rates from DERIVE types")
 
 	flag.Parse()
 
@@ -179,7 +181,7 @@ func processPacket(packet collectd.Packet) []*influxdb.Series {
 		readyToSend := true
 		normalizedValue := value
 
-		if *normalize && dataType == collectd.TypeCounter || dataType == collectd.TypeDerive {
+		if *normalize && dataType == collectd.TypeCounter || *storeRates && dataType == collectd.TypeDerive {
 			if before, ok := beforeCache[name]; ok && before.Value != math.NaN() {
 				// normalize over time
 				if timestamp-before.Timestamp > 0 {
