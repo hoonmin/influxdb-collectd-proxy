@@ -39,6 +39,7 @@ var (
 // point cache to perform data normalization for COUNTER and DERIVE types
 type CacheEntry struct {
 	Timestamp int64
+	Hostname  string
 	Value     float64
 }
 
@@ -172,7 +173,8 @@ func processPacket(packet collectd.Packet) []*influxdb.Series {
 			typeName += "-" + t[i][0]
 		}
 
-		name := hostName + "." + pluginName + "." + typeName
+		//name := hostName + "." + pluginName + "." + typeName
+		name := "collectd." + pluginName + "." + typeName
 
 		// influxdb stuffs
 		timestamp := packet.Time().UnixNano() / 1000000
@@ -195,6 +197,7 @@ func processPacket(packet collectd.Packet) []*influxdb.Series {
 			}
 			entry := CacheEntry{
 				Timestamp: timestamp,
+				Hostname: hostName,
 				Value:     value,
 			}
 			beforeCache[name] = entry
@@ -203,9 +206,9 @@ func processPacket(packet collectd.Packet) []*influxdb.Series {
 		if readyToSend {
 			series := &influxdb.Series{
 				Name:    name,
-				Columns: []string{"time", "value"},
+				Columns: []string{"time", "hostname", "value"},
 				Points: [][]interface{}{
-					[]interface{}{timestamp, normalizedValue},
+					[]interface{}{timestamp, hostName, normalizedValue},
 				},
 			}
 			if *verbose {
