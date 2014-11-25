@@ -31,6 +31,9 @@ var (
 	normalize *bool
 	storeRates *bool
 
+	// Format
+	hostnameAsColumn *bool
+	
 	types       Types
 	client      *influxdb.Client
 	beforeCache map[string]CacheEntry
@@ -40,6 +43,7 @@ var (
 type CacheEntry struct {
 	Timestamp int64
 	Value     float64
+	Hostname  string
 }
 
 // signal handler
@@ -67,6 +71,8 @@ func init() {
 	normalize = flag.Bool("normalize", true, "true if you need to normalize data for COUNTER types (over time)")
 	storeRates = flag.Bool("storerates", true, "true if you need to derive rates from DERIVE types")
 
+	// format options
+	hostnameAsColumn = flag.Bool("hostname-as-column", false, "true if you want the hostname as column, not in series name")
 	flag.Parse()
 
 	beforeCache = make(map[string]CacheEntry)
@@ -142,6 +148,7 @@ func processPacket(packet collectd.Packet) []*influxdb.Series {
 	}
 
 	var seriesGroup []*influxdb.Series
+		
 	// for all metrics in the packet
 	for i, _ := range packet.ValueNames() {
 		values, _ := packet.ValueNumbers()
@@ -171,9 +178,9 @@ func processPacket(packet collectd.Packet) []*influxdb.Series {
 		} else if t != nil {
 			typeName += "-" + t[i][0]
 		}
-
+	
 		name := hostName + "." + pluginName + "." + typeName
-
+		nameNoHostname := pluginName + "." + typeName
 		// influxdb stuffs
 		timestamp := packet.Time().UnixNano() / 1000000
 		value := values[i].Float64()
@@ -194,19 +201,31 @@ func processPacket(packet collectd.Packet) []*influxdb.Series {
 				readyToSend = false
 			}
 			entry := CacheEntry{
-				Timestamp: timestamp,
-				Value:     value,
+                        	Timestamp: timestamp,
+                        	Value:     value,
+                        	Hostname:  hostName,
 			}
+			
 			beforeCache[name] = entry
 		}
 
 		if readyToSend {
+
 			series := &influxdb.Series{
-				Name:    name,
-				Columns: []string{"time", "value"},
-				Points: [][]interface{}{
-					[]interface{}{timestamp, normalizedValue},
-				},
+                                        Name:    name,
+                                        Columns: []string{"time", "value"},
+                                        Points: [][]interface{}{
+                                                []interface{}{timestamp, normalizedValue},
+                                        },
+                                }
+			if *hostnameAsColumn {
+				series = &influxdb.Series{
+                                        Name:    nameNoHostname,
+                                        Columns: []string{"time", "value", "hostname"},
+                                        Points: [][]interface{}{
+                                                []interface{}{timestamp, normalizedValue, hostName},
+                                        },
+                                }
 			}
 			if *verbose {
 				log.Printf("[TRACE] ready to send series: %v\n", series)
