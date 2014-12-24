@@ -48,6 +48,24 @@ Usage of bin/proxy:
   -verbose=false: true if you need to trace the requests
 ```
 
+## Systemd Unit File
+
+Only tested on Arch Linux. You may have to adjust the path of typesdb for your distro.
+
+```
+[Unit]
+Description=Proxy that forwards collectd data to influxdb
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/influxdb-collectd-proxy --database=collectd --username=root --password=root --typesdb=/usr/share/collectd/types.db
+User=collectd-proxy
+Group=collectd-proxy
+
+[Install]
+RequiredBy=collectd.service
+```
+
 ## Dependencies
 
 - http://github.com/paulhammond/gocollectd
@@ -67,3 +85,4 @@ This project is maintained with following contributors' supports.
 - falzm (http://github.com/falzm)
 - vbatoufflet (http://github.com/vbatoufflet)
 - cstorey (http://github.com/cstorey)
+- yanfali (http://github.com/yanfali)
