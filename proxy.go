@@ -172,6 +172,15 @@ func processPacket(packet collectd.Packet) []*influxdb.Series {
 			typeName += "-" + t[i][0]
 		}
 
+		// Append "-rx" or "-tx" for Plugin:Interface - by linyanzhong
+		if packet.Plugin == "interface" {
+			if i == 0 {
+				typeName += "-tx"
+			} else if i == 1 {
+				typeName += "-rx"
+			}
+		}
+
 		name := hostName + "." + pluginName + "." + typeName
 
 		// influxdb stuffs
