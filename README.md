@@ -86,3 +86,4 @@ This project is maintained with following contributors' supports.
 - vbatoufflet (http://github.com/vbatoufflet)
 - cstorey (http://github.com/cstorey)
 - yanfali (http://github.com/yanfali)
+- linyanzhong (http://github.com/linyanzhong)
