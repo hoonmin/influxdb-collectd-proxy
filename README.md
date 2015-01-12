@@ -89,4 +89,3 @@ This project is maintained with following contributors' supports.
 - jeroenbo (http://github.com/jeroenbo)
 - yanfali (http://github.com/yanfali)
 - linyanzhong (http://github.com/linyanzhong)
-- rplessl (http://github.com/rplessl)
