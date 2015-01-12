@@ -36,6 +36,7 @@ $ bin/proxy --typesdb="types.db" --database="collectd" --username="collectd" --p
 $ bin/proxy --help
 Usage of bin/proxy:
   -database="": database for influxdb
+  -hostname-as-column=false: true if you want the hostname as column, not in series name
   -influxdb="localhost:8086": host:port for influxdb
   -logfile="proxy.log": path to log file
   -normalize=true: true if you need to normalize data for COUNTER types (over time)
@@ -85,6 +86,7 @@ This project is maintained with following contributors' supports.
 - falzm (http://github.com/falzm)
 - vbatoufflet (http://github.com/vbatoufflet)
 - cstorey (http://github.com/cstorey)
+- jeroenbo (http://github.com/jeroenbo)
 - yanfali (http://github.com/yanfali)
 - linyanzhong (http://github.com/linyanzhong)
 - rplessl (http://github.com/rplessl)
