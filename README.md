@@ -87,3 +87,4 @@ This project is maintained with following contributors' supports.
 - cstorey (http://github.com/cstorey)
 - yanfali (http://github.com/yanfali)
 - linyanzhong (http://github.com/linyanzhong)
+- rplessl (http://github.com/rplessl)
