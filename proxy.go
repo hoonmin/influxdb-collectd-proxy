@@ -13,6 +13,7 @@ import (
 	collectd "github.com/paulhammond/gocollectd"
 )
 
+const appName = "influxdb-collectd-proxy"
 const influxWriteInterval = time.Second
 const influxWriteLimit = 50
 
@@ -52,6 +53,9 @@ func handleSignals(c chan os.Signal) {
 }
 
 func init() {
+	// log options
+	log.SetPrefix("[" + appName + "] ")
+
 	// proxy options
 	proxyHost = flag.String("proxyhost", "0.0.0.0", "host for proxy")
 	proxyPort = flag.String("proxyport", "8096", "port for proxy")
