@@ -210,9 +210,9 @@ func processPacket(packet collectd.Packet) []*influxdb.Series {
 				readyToSend = false
 			}
 			entry := CacheEntry{
-                        	Timestamp: timestamp,
-                        	Value:     value,
-                        	Hostname:  hostName,
+				Timestamp: timestamp,
+				Value:     value,
+				Hostname:  hostName,
 			}
 
 			beforeCache[name] = entry
@@ -221,15 +221,17 @@ func processPacket(packet collectd.Packet) []*influxdb.Series {
 		if readyToSend {
 			columns := []string{"time", "value"}
 			points_values := []interface{}{timestamp, normalizedValue}
+			name_value := name
 
 			// option hostname-as-column is true
-			if *hostnamenameAsColumn {
+			if *hostnameAsColumn {
+				name_value = nameNoHostname
 				columns = append(columns, "hostname")
 				points_values = append(points_values, hostName)
 			}
 
 			series := &influxdb.Series{
-				Name:    name,
+				Name:    name_value,
 				Columns: columns,
 				Points:  [][]interface{}{
 					points_values,
