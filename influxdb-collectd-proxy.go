@@ -32,6 +32,9 @@ var (
 	normalize *bool
 	storeRates *bool
 
+	// Format
+	pluginnameAsColumn *bool
+
 	types       Types
 	client      *influxdb.Client
 	beforeCache map[string]CacheEntry
@@ -71,6 +74,8 @@ func init() {
 	normalize = flag.Bool("normalize", true, "true if you need to normalize data for COUNTER types (over time)")
 	storeRates = flag.Bool("storerates", true, "true if you need to derive rates from DERIVE types")
 
+	// format options
+	pluginnameAsColumn = flag.Bool("pluginname-as-column", false, "true if you want the plugin name as column")
 	flag.Parse()
 
 	beforeCache = make(map[string]CacheEntry)
@@ -214,11 +219,20 @@ func processPacket(packet collectd.Packet) []*influxdb.Series {
 		}
 
 		if readyToSend {
+			columns := []string{"time", "value"}
+			points_values := []interface{}{timestamp, normalizedValue}
+
+			// option pluginname-as-column is true
+			if *pluginnameAsColumn {
+				columns = append(columns, "plugin")
+				points_values = append(points_values, pluginName)
+			}
+
 			series := &influxdb.Series{
 				Name:    name,
-				Columns: []string{"time", "value"},
-				Points: [][]interface{}{
-					[]interface{}{timestamp, normalizedValue},
+				Columns: columns,
+				Points:  [][]interface{}{
+					points_values,
 				},
 			}
 			if *verbose {

@@ -36,6 +36,7 @@ $ bin/influxdb-collectd-proxy --typesdb="/usr/share/collectd/types.db" --databas
 $ bin/influxdb-collectd-proxy --help
 Usage of bin/influxdb-collectd-proxy:
   -database="": database for influxdb
+  -pluginname-as-column=false: true if you want the pluginname as column
   -influxdb="localhost:8086": host:port for influxdb
   -logfile="proxy.log": path to log file
   -normalize=true: true if you need to normalize data for COUNTER types (over time)
