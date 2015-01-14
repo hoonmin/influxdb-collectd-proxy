@@ -13,6 +13,7 @@ import (
 	collectd "github.com/paulhammond/gocollectd"
 )
 
+const appName = "influxdb-collectd-proxy"
 const influxWriteInterval = time.Second
 const influxWriteLimit = 50
 
@@ -33,6 +34,7 @@ var (
 
 	// Format
 	hostnameAsColumn *bool
+	pluginnameAsColumn *bool
 
 	types       Types
 	client      *influxdb.Client
@@ -56,6 +58,9 @@ func handleSignals(c chan os.Signal) {
 }
 
 func init() {
+	// log options
+	log.SetPrefix("[" + appName + "] ")
+
 	// proxy options
 	proxyHost = flag.String("proxyhost", "0.0.0.0", "host for proxy")
 	proxyPort = flag.String("proxyport", "8096", "port for proxy")
@@ -73,6 +78,7 @@ func init() {
 
 	// format options
 	hostnameAsColumn = flag.Bool("hostname-as-column", false, "true if you want the hostname as column, not in series name")
+	pluginnameAsColumn = flag.Bool("pluginname-as-column", false, "true if you want the plugin name as column")
 	flag.Parse()
 
 	beforeCache = make(map[string]CacheEntry)
@@ -229,6 +235,13 @@ func processPacket(packet collectd.Packet) []*influxdb.Series {
 				columns = append(columns, "hostname")
 				points_values = append(points_values, hostName)
 			}
+
+			// option pluginname-as-column is true
+			if *pluginnameAsColumn {
+				columns = append(columns, "plugin")
+				points_values = append(points_values, pluginName)
+			}
+
 
 			series := &influxdb.Series{
 				Name:    name_value,

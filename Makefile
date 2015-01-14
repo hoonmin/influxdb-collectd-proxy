@@ -1,6 +1,6 @@
 GOPATH:=$(GOPATH):`pwd`
 BIN=bin
-EXE=proxy
+EXE=influxdb-collectd-proxy
 
 GOCOLLECTD=github.com/paulhammond/gocollectd
 INFLUXDBGO=github.com/influxdb/influxdb/client

@@ -19,7 +19,7 @@ First, add following lines to collectd.conf then restart the collectd daemon.
 LoadPlugin network
 
 <Plugin network>
-  # proxy address
+  # influxdb collectd proxy address
   Server "127.0.0.1" "8096"
 </Plugin>
 ```
@@ -27,16 +27,17 @@ LoadPlugin network
 And start the proxy.
 
 ```
-$ bin/proxy --typesdb="types.db" --database="collectd" --username="collectd" --password="collectd"
+$ bin/influxdb-collectd-proxy --typesdb="/usr/share/collectd/types.db" --database="collectd" --username="collectd" --password="collectd"
 ```
 
 ## Options
 
 ```
-$ bin/proxy --help
-Usage of bin/proxy:
+$ bin/influxdb-collectd-proxy --help
+Usage of bin/influxdb-collectd-proxy:
   -database="": database for influxdb
   -hostname-as-column=false: true if you want the hostname as column, not in series name
+  -pluginname-as-column=false: true if you want the pluginname as column
   -influxdb="localhost:8086": host:port for influxdb
   -logfile="proxy.log": path to log file
   -normalize=true: true if you need to normalize data for COUNTER types (over time)
@@ -89,3 +90,4 @@ This project is maintained with following contributors' supports.
 - jeroenbo (http://github.com/jeroenbo)
 - yanfali (http://github.com/yanfali)
 - linyanzhong (http://github.com/linyanzhong)
+- rplessl (http://github.com/rplessl)
