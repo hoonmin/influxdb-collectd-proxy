@@ -36,6 +36,7 @@ $ bin/influxdb-collectd-proxy --typesdb="/usr/share/collectd/types.db" --databas
 $ bin/influxdb-collectd-proxy --help
 Usage of bin/influxdb-collectd-proxy:
   -database="": database for influxdb
+  -hostname-as-column=false: true if you want the hostname as column, not in series name
   -pluginname-as-column=false: true if you want the pluginname as column
   -influxdb="localhost:8086": host:port for influxdb
   -logfile="proxy.log": path to log file
@@ -86,6 +87,7 @@ This project is maintained with following contributors' supports.
 - falzm (http://github.com/falzm)
 - vbatoufflet (http://github.com/vbatoufflet)
 - cstorey (http://github.com/cstorey)
+- jeroenbo (http://github.com/jeroenbo)
 - yanfali (http://github.com/yanfali)
 - linyanzhong (http://github.com/linyanzhong)
 - rplessl (http://github.com/rplessl)

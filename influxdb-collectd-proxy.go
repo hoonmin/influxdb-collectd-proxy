@@ -33,6 +33,7 @@ var (
 	storeRates *bool
 
 	// Format
+	hostnameAsColumn *bool
 	pluginnameAsColumn *bool
 
 	types       Types
@@ -44,6 +45,7 @@ var (
 type CacheEntry struct {
 	Timestamp int64
 	Value     float64
+	Hostname  string
 }
 
 // signal handler
@@ -75,6 +77,7 @@ func init() {
 	storeRates = flag.Bool("storerates", true, "true if you need to derive rates from DERIVE types")
 
 	// format options
+	hostnameAsColumn = flag.Bool("hostname-as-column", false, "true if you want the hostname as column, not in series name")
 	pluginnameAsColumn = flag.Bool("pluginname-as-column", false, "true if you want the plugin name as column")
 	flag.Parse()
 
@@ -151,6 +154,7 @@ func processPacket(packet collectd.Packet) []*influxdb.Series {
 	}
 
 	var seriesGroup []*influxdb.Series
+
 	// for all metrics in the packet
 	for i, _ := range packet.ValueNames() {
 		values, _ := packet.ValueNumbers()
@@ -191,7 +195,7 @@ func processPacket(packet collectd.Packet) []*influxdb.Series {
 		}
 
 		name := hostName + "." + pluginName + "." + typeName
-
+		nameNoHostname := pluginName + "." + typeName
 		// influxdb stuffs
 		timestamp := packet.Time().UnixNano() / 1000000
 		value := values[i].Float64()
@@ -214,13 +218,23 @@ func processPacket(packet collectd.Packet) []*influxdb.Series {
 			entry := CacheEntry{
 				Timestamp: timestamp,
 				Value:     value,
+				Hostname:  hostName,
 			}
+
 			beforeCache[name] = entry
 		}
 
 		if readyToSend {
 			columns := []string{"time", "value"}
 			points_values := []interface{}{timestamp, normalizedValue}
+			name_value := name
+
+			// option hostname-as-column is true
+			if *hostnameAsColumn {
+				name_value = nameNoHostname
+				columns = append(columns, "hostname")
+				points_values = append(points_values, hostName)
+			}
 
 			// option pluginname-as-column is true
 			if *pluginnameAsColumn {
@@ -228,8 +242,9 @@ func processPacket(packet collectd.Packet) []*influxdb.Series {
 				points_values = append(points_values, pluginName)
 			}
 
+
 			series := &influxdb.Series{
-				Name:    name,
+				Name:    name_value,
 				Columns: columns,
 				Points:  [][]interface{}{
 					points_values,
