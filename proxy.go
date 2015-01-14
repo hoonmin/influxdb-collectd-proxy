@@ -219,22 +219,21 @@ func processPacket(packet collectd.Packet) []*influxdb.Series {
 		}
 
 		if readyToSend {
+			columns := []string{"time", "value"}
+			points_values := []interface{}{timestamp, normalizedValue}
+
+			// option hostname-as-column is true
+			if *hostnamenameAsColumn {
+				columns = append(columns, "hostname")
+				points_values = append(points_values, hostName)
+			}
 
 			series := &influxdb.Series{
-                                        Name:    name,
-                                        Columns: []string{"time", "value"},
-                                        Points: [][]interface{}{
-                                                []interface{}{timestamp, normalizedValue},
-                                        },
-                                }
-			if *hostnameAsColumn {
-				series = &influxdb.Series{
-                                        Name:    nameNoHostname,
-                                        Columns: []string{"time", "value", "hostname"},
-                                        Points: [][]interface{}{
-                                                []interface{}{timestamp, normalizedValue, hostName},
-                                        },
-                                }
+				Name:    name,
+				Columns: columns,
+				Points:  [][]interface{}{
+					points_values,
+				},
 			}
 			if *verbose {
 				log.Printf("[TRACE] ready to send series: %v\n", series)
