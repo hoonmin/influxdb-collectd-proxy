@@ -216,16 +216,19 @@ func processPacket(packet collectd.Packet) []*influxdb.Series {
 
 		if readyToSend {
 			columns := []string{"time", "value"}
-			points := []interface{}{timestamp, normalizedValue}
-			if pluginname-as-column { 
-				columuns = append(columns, "plugin") 
-				points = append(points, pluginName)
+			points_values := []interface{}{timestamp, normalizedValue}
+
+			// option pluginname-as-column is true
+			if *pluginnameAsColumn {
+				columns = append(columns, "plugin")
+				points_values = append(points_values, pluginName)
 			}
+
 			series := &influxdb.Series{
 				Name:    name,
 				Columns: columns,
-				Points: [][]interface{}{
-					points,
+				Points:  [][]interface{}{
+					points_values,
 				},
 			}
 			if *verbose {
