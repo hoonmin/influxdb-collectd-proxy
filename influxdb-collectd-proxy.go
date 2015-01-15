@@ -13,6 +13,7 @@ import (
 	collectd "github.com/paulhammond/gocollectd"
 )
 
+const appName = "influxdb-collectd-proxy"
 const influxWriteInterval = time.Second
 const influxWriteLimit = 50
 
@@ -31,6 +32,10 @@ var (
 	normalize *bool
 	storeRates *bool
 
+	// Format
+	hostnameAsColumn *bool
+	pluginnameAsColumn *bool
+
 	types       Types
 	client      *influxdb.Client
 	beforeCache map[string]CacheEntry
@@ -40,6 +45,7 @@ var (
 type CacheEntry struct {
 	Timestamp int64
 	Value     float64
+	Hostname  string
 }
 
 // signal handler
@@ -52,6 +58,9 @@ func handleSignals(c chan os.Signal) {
 }
 
 func init() {
+	// log options
+	log.SetPrefix("[" + appName + "] ")
+
 	// proxy options
 	proxyHost = flag.String("proxyhost", "0.0.0.0", "host for proxy")
 	proxyPort = flag.String("proxyport", "8096", "port for proxy")
@@ -67,6 +76,9 @@ func init() {
 	normalize = flag.Bool("normalize", true, "true if you need to normalize data for COUNTER types (over time)")
 	storeRates = flag.Bool("storerates", true, "true if you need to derive rates from DERIVE types")
 
+	// format options
+	hostnameAsColumn = flag.Bool("hostname-as-column", false, "true if you want the hostname as column, not in series name")
+	pluginnameAsColumn = flag.Bool("pluginname-as-column", false, "true if you want the plugin name as column")
 	flag.Parse()
 
 	beforeCache = make(map[string]CacheEntry)
@@ -142,6 +154,7 @@ func processPacket(packet collectd.Packet) []*influxdb.Series {
 	}
 
 	var seriesGroup []*influxdb.Series
+
 	// for all metrics in the packet
 	for i, _ := range packet.ValueNames() {
 		values, _ := packet.ValueNumbers()
@@ -182,7 +195,7 @@ func processPacket(packet collectd.Packet) []*influxdb.Series {
 		}
 
 		name := hostName + "." + pluginName + "." + typeName
-
+		nameNoHostname := pluginName + "." + typeName
 		// influxdb stuffs
 		timestamp := packet.Time().UnixNano() / 1000000
 		value := values[i].Float64()
@@ -205,16 +218,36 @@ func processPacket(packet collectd.Packet) []*influxdb.Series {
 			entry := CacheEntry{
 				Timestamp: timestamp,
 				Value:     value,
+				Hostname:  hostName,
 			}
+
 			beforeCache[name] = entry
 		}
 
 		if readyToSend {
+			columns := []string{"time", "value"}
+			points_values := []interface{}{timestamp, normalizedValue}
+			name_value := name
+
+			// option hostname-as-column is true
+			if *hostnameAsColumn {
+				name_value = nameNoHostname
+				columns = append(columns, "hostname")
+				points_values = append(points_values, hostName)
+			}
+
+			// option pluginname-as-column is true
+			if *pluginnameAsColumn {
+				columns = append(columns, "plugin")
+				points_values = append(points_values, pluginName)
+			}
+
+
 			series := &influxdb.Series{
-				Name:    name,
-				Columns: []string{"time", "value"},
-				Points: [][]interface{}{
-					[]interface{}{timestamp, normalizedValue},
+				Name:    name_value,
+				Columns: columns,
+				Points:  [][]interface{}{
+					points_values,
 				},
 			}
 			if *verbose {
