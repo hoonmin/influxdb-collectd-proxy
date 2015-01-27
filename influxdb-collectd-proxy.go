@@ -13,9 +13,14 @@ import (
 	collectd "github.com/paulhammond/gocollectd"
 )
 
-const appName = "influxdb-collectd-proxy"
-const influxWriteInterval = time.Second
-const influxWriteLimit = 50
+const (
+	appName             = "influxdb-collectd-proxy"
+	influxWriteInterval = time.Second
+	influxWriteLimit    = 50
+	influxDbPassword    = "INFLUXDB_PROXY_PASSWORD"
+	influxDbUsername    = "INFLUXDB_PROXY_USERNAME"
+	influxDbName        = "INFLUXDB_PROXY_DATABASE"
+)
 
 var (
 	proxyHost   *string
@@ -25,15 +30,15 @@ var (
 	verbose     *bool
 
 	// influxdb options
-	host      *string
-	username  *string
-	password  *string
-	database  *string
-	normalize *bool
+	host       *string
+	username   *string
+	password   *string
+	database   *string
+	normalize  *bool
 	storeRates *bool
 
 	// Format
-	hostnameAsColumn *bool
+	hostnameAsColumn   *bool
 	pluginnameAsColumn *bool
 
 	types       Types
@@ -57,6 +62,14 @@ func handleSignals(c chan os.Signal) {
 	os.Exit(1)
 }
 
+func getenvOrDefault(key, defaultValue string) string {
+	value := os.Getenv(key)
+	if value == "" {
+		return defaultValue
+	}
+	return value
+}
+
 func init() {
 	// log options
 	log.SetPrefix("[" + appName + "] ")
@@ -70,9 +83,9 @@ func init() {
 
 	// influxdb options
 	host = flag.String("influxdb", "localhost:8086", "host:port for influxdb")
-	username = flag.String("username", "root", "username for influxdb")
-	password = flag.String("password", "root", "password for influxdb")
-	database = flag.String("database", "", "database for influxdb")
+	username = flag.String("username", getenvOrDefault(influxDbUsername, "root"), "username for influxdb or $INFLUXDB_PROXY_USERNAME env")
+	password = flag.String("password", getenvOrDefault(influxDbPassword, "root"), "password for influxdb or $INFLUXDB_PROXY_PASSWORD env")
+	database = flag.String("database", getenvOrDefault(influxDbName, ""), "database for influxdb or $INFLUXDB_PROXY_DATABASE env")
 	normalize = flag.Bool("normalize", true, "true if you need to normalize data for COUNTER types (over time)")
 	storeRates = flag.Bool("storerates", true, "true if you need to derive rates from DERIVE types")
 
@@ -242,11 +255,10 @@ func processPacket(packet collectd.Packet) []*influxdb.Series {
 				points_values = append(points_values, pluginName)
 			}
 
-
 			series := &influxdb.Series{
 				Name:    name_value,
 				Columns: columns,
-				Points:  [][]interface{}{
+				Points: [][]interface{}{
 					points_values,
 				},
 			}
