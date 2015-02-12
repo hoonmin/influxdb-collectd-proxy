@@ -1,0 +1,15 @@
+{
+	"ImportPath": "github.com/hoonmin/influxdb-collectd-proxy",
+	"GoVersion": "go1.4.1",
+	"Deps": [
+		{
+			"ImportPath": "github.com/influxdb/influxdb/client",
+			"Comment": "v0.8.6",
+			"Rev": "a0fd0cd03efd284fed64bb598f9c1e5fa1d984e5"
+		},
+		{
+			"ImportPath": "github.com/paulhammond/gocollectd",
+			"Rev": "8f48e457ea036c6405db352d5be1ecf92d4b43bf"
+		}
+	]
+}
