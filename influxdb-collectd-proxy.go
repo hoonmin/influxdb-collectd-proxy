@@ -231,7 +231,7 @@ func processPacket(packet collectd.Packet) []*influxdb.Series {
 						readyToSend = false
 					} else {
                                                 var width float64
-						width := 64
+						width = 64
 						if before.Value < math.Exp2(32) {
 							width = 32
 						}
