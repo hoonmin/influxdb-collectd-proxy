@@ -218,11 +218,28 @@ func processPacket(packet collectd.Packet) []*influxdb.Series {
 
 		if *normalize && dataType == collectd.TypeCounter || *storeRates && dataType == collectd.TypeDerive {
 			if before, ok := beforeCache[name]; ok && before.Value != math.NaN() {
-				// normalize over time
-				if timestamp-before.Timestamp > 0 {
-					normalizedValue = (value - before.Value) / float64((timestamp-before.Timestamp)/1000)
+				if before.Value < value {
+					// normalize over time
+					if timestamp-before.Timestamp > 0 {
+						normalizedValue = (value - before.Value) / float64((timestamp-before.Timestamp)/1000)
+					} else {
+						normalizedValue = value - before.Value
+					}
 				} else {
-					normalizedValue = value - before.Value
+					if dataType == collectd.TypeDerive {
+						// skip current data if there's no initial entry
+						readyToSend = false
+					} else {
+                                                var width float64
+						width = 64
+						if before.Value < math.Exp2(32) {
+							width = 32
+						}
+						normalizedValue = math.Exp2(width) - before.Value + value
+						if timestamp-before.Timestamp > 0 {
+							normalizedValue = normalizedValue / float64((timestamp-before.Timestamp)/1000)
+						}
+					}
 				}
 			} else {
 				// skip current data if there's no initial entry
