@@ -230,6 +230,7 @@ func processPacket(packet collectd.Packet) []*influxdb.Series {
 						// skip current data if there's no initial entry
 						readyToSend = false
 					} else {
+                                                var width float64
 						width := 64
 						if before.Value < math.Exp2(32) {
 							width = 32
