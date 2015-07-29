@@ -1,6 +1,8 @@
 influxdb-collectd-proxy
 =======================
 
+[![Build Status](https://travis-ci.org/yulis/influxdb-collectd-proxy.svg?branch=master)](https://travis-ci.org/yulis/influxdb-collectd-proxy)
+
 A very simple proxy between collectd and influxdb.
 
 ## Build
@@ -36,6 +38,7 @@ $ bin/influxdb-collectd-proxy --typesdb="/usr/share/collectd/types.db" --databas
 $ bin/influxdb-collectd-proxy --help
 Usage of bin/influxdb-collectd-proxy:
   -database="": database for influxdb
+  -prefix="": prefix for influxdb timeseries name
   -hostname-as-column=false: true if you want the hostname as column, not in series name
   -pluginname-as-column=false: true if you want the pluginname as column
   -influxdb="localhost:8086": host:port for influxdb
@@ -91,3 +94,4 @@ This project is maintained with following contributors' supports.
 - yanfali (http://github.com/yanfali)
 - linyanzhong (http://github.com/linyanzhong)
 - rplessl (http://github.com/rplessl)
+- yulis (http://github.com/yulis)

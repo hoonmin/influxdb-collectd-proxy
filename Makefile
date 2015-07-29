@@ -1,20 +1,14 @@
-GOPATH:=$(GOPATH):`pwd`
-BIN=bin
-EXE=influxdb-collectd-proxy
+PWD := $(shell pwd)
+BUILDDIR := $(PWD)/build
 
-GOCOLLECTD=github.com/paulhammond/gocollectd
-INFLUXDBGO=github.com/influxdb/influxdb/client
+all: clean install build
 
-all: get build
-
-get:
-	GOPATH=$(GOPATH) go get $(GOCOLLECTD)
-	GOPATH=$(GOPATH) go get $(INFLUXDBGO)
+install:
+	GOPATH=$(BUILDDIR) go get github.com/tools/godep
+	GOPATH=$(BUILDDIR) $(BUILDDIR)/bin/godep restore
 
 build:
-	GOPATH=$(GOPATH) go build -o $(BIN)/$(EXE)
+	GOPATH=$(BUILDDIR) go build -o $(BUILDDIR)/bin/influxdb-collectd-proxy
 
 clean: 
-	rm -rf src
-	rm -rf pkg
-	rm -rf bin
+	rm -rf $(BUILDDIR)
