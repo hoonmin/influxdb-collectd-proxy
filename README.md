@@ -1,6 +1,8 @@
 influxdb-collectd-proxy
 =======================
 
+[![Build Status](https://travis-ci.org/yulis/influxdb-collectd-proxy.svg?branch=master)](https://travis-ci.org/yulis/influxdb-collectd-proxy)
+
 A very simple proxy between collectd and influxdb.
 
 ## Build
