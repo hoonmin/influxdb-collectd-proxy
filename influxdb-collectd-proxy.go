@@ -93,7 +93,7 @@ func init() {
 	// format options
 	hostnameAsColumn = flag.Bool("hostname-as-column", false, "true if you want the hostname as column, not in series name")
 	pluginnameAsColumn = flag.Bool("pluginname-as-column", false, "true if you want the plugin name as column")
-	prefix = flag.String("prefix", "", "influxdb series prefix")
+	prefix = flag.String("prefix", "", "prefix for influxdb timeseries name")
 	flag.Parse()
 
 	beforeCache = make(map[string]CacheEntry)

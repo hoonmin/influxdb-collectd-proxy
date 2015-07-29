@@ -38,6 +38,7 @@ $ bin/influxdb-collectd-proxy --typesdb="/usr/share/collectd/types.db" --databas
 $ bin/influxdb-collectd-proxy --help
 Usage of bin/influxdb-collectd-proxy:
   -database="": database for influxdb
+  -prefix="": prefix for influxdb timeseries name
   -hostname-as-column=false: true if you want the hostname as column, not in series name
   -pluginname-as-column=false: true if you want the pluginname as column
   -influxdb="localhost:8086": host:port for influxdb
