@@ -40,6 +40,7 @@ var (
 	// Format
 	hostnameAsColumn   *bool
 	pluginnameAsColumn *bool
+	prefix             *string
 
 	types       Types
 	client      *influxdb.Client
@@ -92,6 +93,7 @@ func init() {
 	// format options
 	hostnameAsColumn = flag.Bool("hostname-as-column", false, "true if you want the hostname as column, not in series name")
 	pluginnameAsColumn = flag.Bool("pluginname-as-column", false, "true if you want the plugin name as column")
+	prefix = flag.String("prefix", "", "influxdb series prefix")
 	flag.Parse()
 
 	beforeCache = make(map[string]CacheEntry)
@@ -253,6 +255,11 @@ func processPacket(packet collectd.Packet) []*influxdb.Series {
 			if *pluginnameAsColumn {
 				columns = append(columns, "plugin")
 				points_values = append(points_values, pluginName)
+			}
+
+			// prepend prefix if not empty
+			if len(*prefix) > 0 {
+				name_value = strings.Join([]string{*prefix,name_value}, ".")
 			}
 
 			series := &influxdb.Series{
