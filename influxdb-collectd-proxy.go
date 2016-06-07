@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	influxdb "github.com/influxdb/influxdb/client"
+	influxdb "github.com/influxdata/influxdb/client"
 	collectd "github.com/paulhammond/gocollectd"
 )
 
